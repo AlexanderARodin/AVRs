@@ -161,4 +161,4 @@ ADC_C:		; ADC Conversion Handler
 
 ; -- ################### --
 ; -- const data in FLASH --
-Program_name: .DB "basic template"
+Program_name: .DB "GITting template"
