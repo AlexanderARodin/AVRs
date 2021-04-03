@@ -1,6 +1,7 @@
 
 .INCLUDEPATH "/usr/share/avra/"	; path to INC-files
-.INCLUDE "tn13ADdef.inc"			; macrodefinitions for AT***
+.INCLUDE "tn13Adef.inc"			; macrodefinitions for AT***
+.include "../raaAvrMacro.inc"
 .LIST							; generate listing
 
 .CSEG					; code segment
@@ -17,62 +18,50 @@
 0x0009:	rjmp ADC_C			; ADC Conversion Handler
 
 RESET:
-	ldi r16, low(RAMEND)	; Load top of RAM
-	out SPL,r16				; Set Stack Pointer to top of RAM
+	outi	[SPL, r16, low(RAMEND)]				; Set Stack Pointer to top of RAM
 
 INIT:
-	ldi R16, 0b00011111		; mask for output Ports 
-	out DDRB, R16			; load the mask from  R16 to  DDRB
-	;sei						; Enable interrupts
+	outi	[DDRB, r16, 0b00011111]	
+
+	rcall processRestartConditions
+
+	outi	[TIMSK0, r16, 0b00001110]
+	outi	[TCCR0A, r16, 0b01010010]
+	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
+	outi	[OCR0A, r16, 127]
+	outi	[OCR0B, r16, 28]
+	;outi	[GTCCR, r16, 0b00000001]		; start tcnt0
+	sei						; Enable interrupts
 
 
 .equ Delay = 1;			; установка константы времени задержки
 MAIN:
-	in r2,MCUSR
-	ldi r16, 0
-	out MCUSR, r16
-tsttt:
-	out PORTB, r2
-	;rcall setAllPorts
-	rcall waitLong
-	rcall clearAllPorts
-	rcall waitLong
-	rjmp tsttt
-	rcall setAllPorts
-	rcall waitLong
-	rcall clearAllPorts
-	rcall waitLong
-	rcall setAllPorts
-
+	ldi r17, 0xff
+	ldi r16, 0xff
 LOOP:
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB0
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB1
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB2
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB3
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB4
-	RCALL Wait
-	RJMP LOOP			; loop to LOOP
+	in r16,TCNT0
+	andi r16, 0b10000000
+	breq ifBitZerro
+	;SBI PORTB, 0
+	rjmp endBitZerro
+ifBitZerro:
+	;CBI PORTB, 0
+endBitZerro:
+	;eor r16,r17
+	;rcall wait
+	;out PORTB, r16
+	;rcall wait
+	rjmp LOOP
+
+
+
 
 ; -- waiting subroutine --
 waitLong:
-	ldi R17, Delay * 10
+	ldi R20, Delay * 10
 	rjmp WLoop0
 Wait:
-	LDI  R17, Delay			; загрузка константы для задержки в регистр R17
+	LDI  R20, Delay			; загрузка константы для задержки в регистр R17
 WLoop0:
 	LDI  R18, 50			; загружаем число 50 (0x32) в регистр R18
 WLoop1:
@@ -82,50 +71,94 @@ WLoop2:
 	BRNE WLoop2			; возврат к WLoop2 если значение в R19 не равно 0
 	DEC  R18			; уменьшаем значение в регистре R18 на 1
 	BRNE WLoop1			; возврат к WLoop1 если значение в R18 не равно 0
-	DEC  R17			; уменьшаем значение в регистре R17 на 1
+	DEC  R20			; уменьшаем значение в регистре R17 на 1
 	BRNE WLoop0			; возврат к WLoop0 если значение в R17 не равно 0
 	RET					; возврат из подпрограммы Wait
 
 clearAllPorts:
-	ldi r16, 0
-	out PORTB, r16
+	outi [PORTB, r16, 0]
 	ret
 
 setAllPorts:
-	ldi r16, 0b00011111
-	out PORTB, r16
+	outi [PORTB, r16, 0b00011111]
 	ret
+
+processRestartConditions:
+	ldi		r16, 0
+	in r2,MCUSR
+	out MCUSR, r16
+	out	PORTB, r2
+	rcall waitLong
+	out	PORTB, r16
+	rcall waitLong
+	out	PORTB, r2
+	rcall waitLong
+	out	PORTB, r16
+	rcall waitLong
+	out	PORTB, r2
+	rcall waitLong
+	out	PORTB, r16
+	rcall waitLong
+	ret
+
 
 ; -- ################### --
 ; -- interrupts handlers --
 
 EXT_INT0:	; IRQ0 Handler
+	sbi PORTB, 4
 	reti
 
 PC_INT0:	; PCINT0 Handler
+	sbi PORTB, 4
 	reti
 
 TIM0_OVF:	; Timer0 Overflow Handler
+	pushldi		[r16, 0b00000010]
+	pushSreg	[r0]
+	in r0, PORTB
+	eor r0, r16
+	;out PORTB, r0
+	popSreg	[r0]
+	pop r16
 	reti
 
 EE_RDY:		; EEPROM Ready Handler
+	sbi PORTB, 4
 	reti
 
 ANA_COMP:	; Analog Comparator Handler
+	sbi PORTB, 4
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
+	pushldi		[r16, 0b00000100]
+	pushSreg	[r0]
+	in r0, PORTB
+	eor r0, r16
+	out PORTB, r0
+	popSreg		[r0]
+	pop r16
 	reti
 
 TIM0_COMPB:	; Timer0 CompareB Handler
+	pushldi		[r16, 0b00001000]
+	pushSreg	[r0]
+	in r0, PORTB
+	eor r0, r16
+	out PORTB, r0
+	popSreg 	[r0]
+	pop r16
 	reti
 
 WATCHDOG:	; Watchdog Interrupt Handler
+	sbi PORTB, 4
 	reti
 
 ADC_C:		; ADC Conversion Handler
+	sbi PORTB, 4
 	reti	; handler exit
 
 ; -- ################### --
 ; -- const data in FLASH --
-Program_name: .DB "go git"
+Program_name: .DB "basic template"
