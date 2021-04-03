@@ -29,12 +29,11 @@ INIT:
 	outi	[TCCR0A, r16, 0b01010010]
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
 	outi	[OCR0A, r16, 127]
-	outi	[OCR0B, r16, 28]
+	outi	[OCR0B, r16, 99]
 	;outi	[GTCCR, r16, 0b00000001]		; start tcnt0
 	sei						; Enable interrupts
 
 
-.equ Delay = 1;			; установка константы времени задержки
 MAIN:
 	ldi r17, 0xff
 	ldi r16, 0xff
@@ -57,6 +56,7 @@ endBitZerro:
 
 
 ; -- waiting subroutine --
+.equ Delay = 3;			; установка константы времени задержки
 waitLong:
 	ldi R20, Delay * 10
 	rjmp WLoop0
