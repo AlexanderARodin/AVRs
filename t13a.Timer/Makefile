@@ -22,6 +22,8 @@ burnflash: $(FLASHHEX) $(EEPHEX)
 compile: $(SRC)
 	$(CC) $(CFLAGS) $(SRC)
 
+edit:
+	vim $(SRC)
 
 clean:
 	rm -rf *.obj *.hex
