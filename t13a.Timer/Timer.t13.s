@@ -1,8 +1,8 @@
 
-.INCLUDEPATH "/usr/share/avra/"	; path to INC-files
-.INCLUDE "tn13Adef.inc"			; macrodefinitions for AT***
+.includepath "/usr/share/avra/"	; path to INC-files
+.include "tn13Adef.inc"			; macrodefinitions for AT***
 .include "../raaAvrMacro.inc"
-.LIST							; generate listing
+.list
 
 .CSEG					; code segment
 .ORG 0x0000				; start address
@@ -18,18 +18,20 @@
 0x0009:	rjmp ADC_C			; ADC Conversion Handler
 
 RESET:
-	outi	[SPL, r16, low(RAMEND)]				; Set Stack Pointer to top of RAM
+	outi	[SPL, r16, low(RAMEND)]			; Set Stack Pointer to top of RAM
+	outi	[PORTB, r16, 0xff]				; pull-up all	
+
 
 INIT:
-	outi	[DDRB, r16, 0b00011111]	
+	outi	[DDRB, r16, 0b00011111]			; output
 
 	rcall processRestartConditions
 
-	outi	[TIMSK0, r16, 0b00001110]
-	outi	[TCCR0A, r16, 0b01010010]
+	outi	[TIMSK0, r16, 0b00001100]		; timer interrupts mask
+	outi	[TCCR0A, r16, 0b01010010]		; settings for PWM
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
-	outi	[OCR0A, r16, 127]
-	outi	[OCR0B, r16, 99]
+	outi	[OCR0A, r16, 200]
+	outi	[OCR0B, r16, 44]
 	;outi	[GTCCR, r16, 0b00000001]		; start tcnt0
 	sei						; Enable interrupts
 
@@ -105,13 +107,6 @@ processRestartConditions:
 ; -- ################### --
 ; -- interrupts handlers --
 
-EXT_INT0:	; IRQ0 Handler
-	sbi PORTB, 4
-	reti
-
-PC_INT0:	; PCINT0 Handler
-	sbi PORTB, 4
-	reti
 
 TIM0_OVF:	; Timer0 Overflow Handler
 	pushldi		[r16, 0b00000010]
@@ -121,14 +116,6 @@ TIM0_OVF:	; Timer0 Overflow Handler
 	;out PORTB, r0
 	popSreg	[r0]
 	pop r16
-	reti
-
-EE_RDY:		; EEPROM Ready Handler
-	sbi PORTB, 4
-	reti
-
-ANA_COMP:	; Analog Comparator Handler
-	sbi PORTB, 4
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
@@ -149,6 +136,23 @@ TIM0_COMPB:	; Timer0 CompareB Handler
 	out PORTB, r0
 	popSreg 	[r0]
 	pop r16
+	reti
+
+EXT_INT0:	; IRQ0 Handler
+	sbi PORTB, 4
+	reti
+
+PC_INT0:	; PCINT0 Handler
+	sbi PORTB, 4
+	reti
+
+
+EE_RDY:		; EEPROM Ready Handler
+	sbi PORTB, 4
+	reti
+
+ANA_COMP:	; Analog Comparator Handler
+	sbi PORTB, 4
 	reti
 
 WATCHDOG:	; Watchdog Interrupt Handler
