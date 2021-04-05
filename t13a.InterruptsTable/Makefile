@@ -24,4 +24,4 @@ compile: $(SRC)
 
 
 clean:
-	rm -rf *.obj *.hex
+	rm -rf *.obj *.cof *.hex
