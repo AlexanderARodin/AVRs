@@ -37,11 +37,13 @@ INIT:
 
 
 MAIN:
-	ldi r16, 44
+	ldi r16, 0x31
 	rcall sendCharToTx
-	ldi r16, 56
+	ldi r16, 0x39
 	rcall sendCharToTx
-	ldi r16, 0xD
+	ldi r16, 0x0A
+	rcall sendCharToTx
+	ldi r16, 0x0D
 	rcall sendCharToTx
 
 	rcall waitLong
@@ -76,35 +78,37 @@ endBitZerro:
 		cbi PORTB, 4			; t=2
 		nop						; t=1
 	xx_%:
-	microDelay [r17, 0x00]		; T=768 <i*3>
-	microDelay [r17, 0x13]		; T=57 <i*3>
-	; sumT = 831
+	nop							; t=1
+	nop							; t=1
+	microDelay [r17, 0xFF]		; T=765 <i*3>
+	microDelay [r17, 0x14]		; T=60 <i*3>
+	; sumT = 833
 .endm
 ; -- send char to Tx --
 sendCharToTx:	; usage: [r16], r17
 	cli
 ;pre-start
-	cbi PORTB, 4				; t=2
-	microDelay [r17, 0x00]		; T=768 <i*3>
-	microDelay [r17, 0x15]		; T=63 <i*3>
+	sbi PORTB, 4				; t=2
+	microDelay [r17, 0xFF]		; T=765 <i*3>
+	microDelay [r17, 0x16]		; T=66 <i*3>
 	; sumT = 833
 ;start bit
-	sbi PORTB, 4				; t=2
-	microDelay [r17, 0x00]		; T=768 <i*3>
-	microDelay [r17, 0x15]		; T=63 <i*3>
-	; sumT = 833
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-	rorR16pushToPORTB4			; T=831
-;stop
 	cbi PORTB, 4				; t=2
-	microDelay [r17, 0x00]		; T=768 <i*3>
-	microDelay [r17, 0x15]		; T=63 <i*3>
+	microDelay [r17, 0xFF]		; T=765 <i*3>
+	microDelay [r17, 0x16]		; T=66 <i*3>
+	; sumT = 833
+	rorR16pushToPORTB4			; T=833
+	 rorR16pushToPORTB4			; T=833
+	  rorR16pushToPORTB4			; T=833
+	   rorR16pushToPORTB4			; T=833
+	rorR16pushToPORTB4			; T=833
+	 rorR16pushToPORTB4			; T=833
+	  rorR16pushToPORTB4			; T=833
+	   rorR16pushToPORTB4			; T=833
+;stop
+	sbi PORTB, 4				; t=2
+	microDelay [r17, 0xFF]		; T=765 <i*3>
+	microDelay [r17, 0x16]		; T=66 <i*3>
 	; sumT = 833
 	sei
 	ret
