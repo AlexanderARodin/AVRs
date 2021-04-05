@@ -1,2 +1,2 @@
 clean:
-	rm -rf *.obj *.cof *.hex
+	rm -rf */*.obj */*.cof */*.hex
