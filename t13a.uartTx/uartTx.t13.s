@@ -37,6 +37,18 @@ INIT:
 
 
 MAIN:
+	ldi r16, 44
+	rcall sendCharToTx
+	ldi r16, 56
+	rcall sendCharToTx
+	ldi r16, 0xD
+	rcall sendCharToTx
+
+	rcall waitLong
+	rcall waitLong
+	rjmp MAIN
+
+
 	ldi r17, 0xff
 	ldi r16, 0xff
 LOOP:
@@ -55,6 +67,47 @@ endBitZerro:
 	rjmp LOOP
 
 
+.macro rorR16pushToPORTB4
+	ror r16						; t=1
+	brcc anot_%					; t=2(1)
+		sbi PORTB, 4			; t=2
+		rjmp xx_%				; t=2
+	anot_%:
+		cbi PORTB, 4			; t=2
+		nop						; t=1
+	xx_%:
+	microDelay [r17, 0x00]		; T=768 <i*3>
+	microDelay [r17, 0x13]		; T=57 <i*3>
+	; sumT = 831
+.endm
+; -- send char to Tx --
+sendCharToTx:	; usage: [r16], r17
+	cli
+;pre-start
+	cbi PORTB, 4				; t=2
+	microDelay [r17, 0x00]		; T=768 <i*3>
+	microDelay [r17, 0x15]		; T=63 <i*3>
+	; sumT = 833
+;start bit
+	sbi PORTB, 4				; t=2
+	microDelay [r17, 0x00]		; T=768 <i*3>
+	microDelay [r17, 0x15]		; T=63 <i*3>
+	; sumT = 833
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+	rorR16pushToPORTB4			; T=831
+;stop
+	cbi PORTB, 4				; t=2
+	microDelay [r17, 0x00]		; T=768 <i*3>
+	microDelay [r17, 0x15]		; T=63 <i*3>
+	; sumT = 833
+	sei
+	ret
 
 
 ; -- waiting subroutine --
@@ -165,4 +218,4 @@ ADC_C:		; ADC Conversion Handler
 
 ; -- ################### --
 ; -- const data in FLASH --
-Program_name: .DB "GITting template"
+Program_name: .DB "making uart.Tx"
