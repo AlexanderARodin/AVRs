@@ -26,4 +26,4 @@ edit:
 	vim $(SRC)
 
 clean:
-	rm -rf *.obj *.cof *.hex
+	rm -rfv *.obj *.cof *.hex
