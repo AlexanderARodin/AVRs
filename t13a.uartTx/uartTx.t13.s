@@ -38,10 +38,12 @@ INIT:
 
 
 MAIN:
-	ldi r16, 0x31
+	ldi r16, 0b01010101
 	rcall sendCharToTx
-	ldi r16, 0x39
+	rcall wait
+	ldi r16, 0b10101010
 	rcall sendCharToTx
+	rcall wait
 	ldi r16, 0x0A
 	rcall sendCharToTx
 	ldi r16, 0x0D
@@ -70,21 +72,6 @@ endBitZerro:
 	rjmp LOOP
 
 
-.macro rorR16pushToPORTB4
-	ror r16						; t=1
-	brcc anot_%					; t=2(1)
-		sbi PORTB, 4			; t=2
-		rjmp xx_%				; t=2
-	anot_%:
-		cbi PORTB, 4			; t=2
-		nop						; t=1
-	xx_%:
-	nop							; t=1
-	nop							; t=1
-	microDelay [r17, 0xFF]		; T=765 <i*3>
-	microDelay [r17, 0x14]		; T=60 <i*3>
-	; sumT = 833
-.endm
 ; -- send char to Tx --
 sendCharToTx:	; usage: [r16], r17
 	cli
