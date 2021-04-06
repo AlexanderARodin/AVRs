@@ -38,12 +38,25 @@ INIT:
 
 
 MAIN:
-	ldi r16, 0b01010101
+	setTxSilenceUsing [r17]
+	ldi r16, 'r' 
 	rcall sendCharToTx
-	rcall wait
-	ldi r16, 0b10101010
+	ldi r16, 'a'
 	rcall sendCharToTx
-	rcall wait
+	ldi r16, 'a'
+	rcall sendCharToTx
+	ldi r16, 'U' 
+	rcall sendCharToTx
+	ldi r16, 'A'
+	rcall sendCharToTx
+	ldi r16, 'R'
+	rcall sendCharToTx
+	ldi r16, 'T'
+	rcall sendCharToTx
+	ldi r16, '*' 
+	rcall sendCharToTx
+	ldi r16, '~'
+	rcall sendCharToTx
 	ldi r16, 0x0A
 	rcall sendCharToTx
 	ldi r16, 0x0D
@@ -71,33 +84,10 @@ endBitZerro:
 	;rcall wait
 	rjmp LOOP
 
-
-; -- send char to Tx --
-sendCharToTx:	; usage: [r16], r17
+; -- send char to Tx    --
+sendCharToTx:
 	cli
-;pre-start
-	sbi PORTB, 4				; t=2
-	microDelay [r17, 0xFF]		; T=765 <i*3>
-	microDelay [r17, 0x16]		; T=66 <i*3>
-	; sumT = 833
-;start bit
-	cbi PORTB, 4				; t=2
-	microDelay [r17, 0xFF]		; T=765 <i*3>
-	microDelay [r17, 0x16]		; T=66 <i*3>
-	; sumT = 833
-	rorR16pushToPORTB4			; T=833
-	 rorR16pushToPORTB4			; T=833
-	  rorR16pushToPORTB4			; T=833
-	   rorR16pushToPORTB4			; T=833
-	rorR16pushToPORTB4			; T=833
-	 rorR16pushToPORTB4			; T=833
-	  rorR16pushToPORTB4			; T=833
-	   rorR16pushToPORTB4			; T=833
-;stop
-	sbi PORTB, 4				; t=2
-	microDelay [r17, 0xFF]		; T=765 <i*3>
-	microDelay [r17, 0x16]		; T=66 <i*3>
-	; sumT = 833
+	sendTxAChar [r16,r17]
 	sei
 	ret
 
@@ -108,11 +98,11 @@ waitLong:
 	ldi R20, Delay * 10
 	rjmp WLoop0
 Wait:
-	LDI  R20, Delay			; загрузка константы для задержки в регистр R17
+	LDI  R20, Delay		; загрузка константы для задержки в регистр R17
 WLoop0:
-	LDI  R18, 50			; загружаем число 50 (0x32) в регистр R18
+	LDI  R18, 50		; загружаем число 50 (0x32) в регистр R18
 WLoop1:
-	LDI  R19, 0xC8			; загружаем число 200 (0xC8, $C8) в регистр R19
+	LDI  R19, 0xC8		; загружаем число 200 (0xC8, $C8) в регистр R19
 WLoop2:
 	DEC  R19			; уменьшаем значение в регистре R19 на 1
 	BRNE WLoop2			; возврат к WLoop2 если значение в R19 не равно 0
