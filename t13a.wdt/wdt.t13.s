@@ -20,57 +20,74 @@
 
 RESET:
 	outi	[SPL, r16, low(RAMEND)]			; Set Stack Pointer to top of RAM
-	outi	[PORTB, r16, 0xff]				; pull-up all	
-
 
 INIT:
 	outi	[DDRB, r16, 0b00011111]			; output
-
-	rcall processRestartConditions
-
+	
+	setTxSilenceUsing [r17]
+	ldi r16, 0x0A
+	rcall typeCharDir
+	ldi r16, 0x0A
+	rcall typeCharDir
+	ldi r16, 'R' 
+	rcall typeCharDir
+	ldi r16, 'E'
+	rcall typeCharDir
+	ldi r16, 'S'
+	rcall typeCharDir
+	ldi r16, '=' 
+	rcall typeCharDir
+		in r16,MCUSR
+		ldi r17, 0x30
+		add r16,r17
+		ldi r17, 0
+		out MCUSR,r17
+		rcall typeCharDir
+	ldi r16, 0x0A
+	rcall typeCharDir
+	ldi r16, 0x0D
+	rcall typeCharDir
+	cbi PORTB,2
+	cbi PORTB,3
+	
+	; setup timer0
 	outi	[TIMSK0, r16, 0b00001100]		; timer interrupts mask
 	outi	[TCCR0A, r16, 0b01010010]		; settings for PWM
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
 	outi	[OCR0A, r16, 200]
 	outi	[OCR0B, r16, 44]
-	;outi	[GTCCR, r16, 0b00000001]		; start tcnt0
+
+	; setup WDT
+	wdr
+	;          76543210
+	ldi r16, 0b01100000
+	out WDTCR, r16
 	sei						; Enable interrupts
 
 
 MAIN:
 	setTxSilenceUsing [r17]
-	ldi r16, 'r' 
-	rcall sendCharToTx
-	ldi r16, 'a'
-	rcall sendCharToTx
-	ldi r16, 'a'
-	rcall sendCharToTx
-	ldi r16, 'U' 
-	rcall sendCharToTx
-	ldi r16, 'A'
-	rcall sendCharToTx
-	ldi r16, 'R'
-	rcall sendCharToTx
-	ldi r16, 'T'
-	rcall sendCharToTx
-	ldi r16, '*' 
-	rcall sendCharToTx
-	ldi r16, '~'
-	rcall sendCharToTx
-	ldi r16, 0x0A
-	rcall sendCharToTx
-	ldi r16, 0x0D
-	rcall sendCharToTx
+	ldi r16, '.' 
+	rcall typeChareSafe
 
+	rcall waitLong
+	rcall waitLong
+	rcall waitLong
+	rcall waitLong
+	rcall waitLong
+	rcall waitLong
 	rcall waitLong
 	rcall waitLong
 rjmp MAIN
 
 ; -- send char to Tx    --
-sendCharToTx:
+typeChareSafe:
 	cli
 	sendTxAChar [r16,r17]
 	sei
+	ret
+typeCharDir:
+	sendTxAChar [r16,r17]
 	ret
 
 
@@ -100,24 +117,6 @@ clearAllPorts:
 
 setAllPorts:
 	outi [PORTB, r16, 0b00011111]
-	ret
-
-processRestartConditions:
-	ldi		r16, 0
-	in r2,MCUSR
-	out MCUSR, r16
-	out	PORTB, r2
-	rcall waitLong
-	out	PORTB, r16
-	rcall waitLong
-	out	PORTB, r2
-	rcall waitLong
-	out	PORTB, r16
-	rcall waitLong
-	out	PORTB, r2
-	rcall waitLong
-	out	PORTB, r16
-	rcall waitLong
 	ret
 
 
@@ -155,30 +154,46 @@ TIM0_COMPB:	; Timer0 CompareB Handler
 	reti
 
 EXT_INT0:	; IRQ0 Handler
-	sbi PORTB, 4
+	sbi PORTB, 2
 	reti
 
 PC_INT0:	; PCINT0 Handler
-	sbi PORTB, 4
+	sbi PORTB, 2
 	reti
 
 
 EE_RDY:		; EEPROM Ready Handler
-	sbi PORTB, 4
+	sbi PORTB, 2
 	reti
 
 ANA_COMP:	; Analog Comparator Handler
-	sbi PORTB, 4
+	sbi PORTB, 2
 	reti
 
 WATCHDOG:	; Watchdog Interrupt Handler
-	sbi PORTB, 4
+	pushSreg [r16]
+	push r17
+		ldi r16, 'W' 
+		rcall typeCharDir
+		ldi r16, 'D'
+		rcall typeCharDir
+		ldi r16, 'G'
+		rcall typeCharDir
+		ldi r16, '!' 
+		rcall typeCharDir
+		ldi r16, 0x0A
+		rcall typeCharDir
+		ldi r16, 0x0D
+		rcall typeCharDir
+		sbi PORTB, 3
+	pop r17
+	popSreg [r16]
 	reti
 
 ADC_C:		; ADC Conversion Handler
-	sbi PORTB, 4
+	sbi PORTB, 2
 	reti	; handler exit
 
 ; -- ################### --
 ; -- const data in FLASH --
-Program_name: .DB "making uart.Tx"
+Program_name: .DB "learning WDT"
