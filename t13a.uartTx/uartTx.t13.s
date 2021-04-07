@@ -64,25 +64,7 @@ MAIN:
 
 	rcall waitLong
 	rcall waitLong
-	rjmp MAIN
-
-
-	ldi r17, 0xff
-	ldi r16, 0xff
-LOOP:
-	in r16,TCNT0
-	andi r16, 0b10000000
-	breq ifBitZerro
-	;SBI PORTB, 0
-	rjmp endBitZerro
-ifBitZerro:
-	;CBI PORTB, 0
-endBitZerro:
-	;eor r16,r17
-	;rcall wait
-	;out PORTB, r16
-	;rcall wait
-	rjmp LOOP
+rjmp MAIN
 
 ; -- send char to Tx    --
 sendCharToTx:
