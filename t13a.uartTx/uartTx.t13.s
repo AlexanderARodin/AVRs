@@ -1,8 +1,8 @@
 
 .includepath "/usr/share/avra/"	; path to INC-files
 .include "tn13Adef.inc"			; macrodefinitions for AT***
-.include "../raaAvrMacro.inc"
-.include "uartTxMacro.inc"
+.include "../libinc/raaAvrMacro.inc"
+.include "../libinc/uartTxMacro.inc"
 .list
 
 .CSEG					; code segment
