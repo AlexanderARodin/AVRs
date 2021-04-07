@@ -124,7 +124,6 @@ processRestartConditions:
 ; -- ################### --
 ; -- interrupts handlers --
 
-
 TIM0_OVF:	; Timer0 Overflow Handler
 	pushldi		[r16, 0b00000010]
 	pushSreg	[r0]
