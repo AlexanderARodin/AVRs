@@ -5,8 +5,8 @@
 .include "../libinc/uartTxMacro.inc"
 .list
 
-.CSEG					; code segment
-.ORG 0x0000				; start address
+.CSEG
+.ORG 0x0000
 0x0000:	rjmp RESET			; Reset Handler
 0x0001:	rjmp EXT_INT0		; IRQ0 Handler
 0x0002:	rjmp PC_INT0		; PCINT0 Handler
@@ -19,7 +19,15 @@
 0x0009:	rjmp ADC_C			; ADC Conversion Handler
 
 RESET:
-	outi	[SPL, r16, low(RAMEND)]			; Set Stack Pointer to top of RAM
+	cli
+	outi	[SPL, r16, low(RAMEND)]		; Stack
+	in r18,MCUSR						; RES info
+	wdr
+	ldi r16, 0
+	out MCUSR, r16						; Crear WDT etc
+	;          76543210
+	ldi r16, 0b00010111
+	out WDTCR, r16
 
 INIT:
 	outi	[DDRB, r16, 0b00011111]			; output
@@ -37,31 +45,22 @@ INIT:
 	rcall typeCharDir
 	ldi r16, '=' 
 	rcall typeCharDir
-		in r16,MCUSR
-		ldi r17, 0x30
-		add r16,r17
-		ldi r17, 0
-		out MCUSR,r17
+		ldi r16,0x30
+		add r16,r18
 		rcall typeCharDir
 	ldi r16, 0x0A
 	rcall typeCharDir
 	ldi r16, 0x0D
 	rcall typeCharDir
-	cbi PORTB,2
-	cbi PORTB,3
 	
 	; setup timer0
-	outi	[TIMSK0, r16, 0b00001100]		; timer interrupts mask
-	outi	[TCCR0A, r16, 0b01010010]		; settings for PWM
+	outi	[TIMSK0, r16, 0b00001110]		; timer interrupts mask
+	outi	[TCCR0A, r16, 0];b01010010]		; settings for PWM
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
-	outi	[OCR0A, r16, 200]
-	outi	[OCR0B, r16, 44]
+	;outi	[OCR0A, r16, 200]
+	;outi	[OCR0B, r16, 44]
+	;outi	[GTCCR, r16, 1]
 
-	; setup WDT
-	wdr
-	;          76543210
-	ldi r16, 0b01100000
-	out WDTCR, r16
 	sei						; Enable interrupts
 
 
@@ -86,6 +85,7 @@ typeChareSafe:
 	sendTxAChar [r16,r17]
 	sei
 	ret
+
 typeCharDir:
 	sendTxAChar [r16,r17]
 	ret
@@ -111,29 +111,24 @@ WLoop2:
 	BRNE WLoop0			; возврат к WLoop0 если значение в R17 не равно 0
 	RET					; возврат из подпрограммы Wait
 
-clearAllPorts:
-	outi [PORTB, r16, 0]
-	ret
-
-setAllPorts:
-	outi [PORTB, r16, 0b00011111]
-	ret
 
 
 ; -- ################### --
 ; -- interrupts handlers --
 
 TIM0_OVF:	; Timer0 Overflow Handler
+	sbi PORTB,0
 	pushldi		[r16, 0b00000010]
 	pushSreg	[r0]
 	in r0, PORTB
 	eor r0, r16
-	;out PORTB, r0
+	out PORTB, r0
 	popSreg	[r0]
 	pop r16
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
+	sbi PORTB, 1
 	pushldi		[r16, 0b00000100]
 	pushSreg	[r0]
 	in r0, PORTB
@@ -144,6 +139,7 @@ TIM0_COMPA:	; Timer0 CompareA Handler
 	reti
 
 TIM0_COMPB:	; Timer0 CompareB Handler
+	sbi PORTB, 2
 	pushldi		[r16, 0b00001000]
 	pushSreg	[r0]
 	in r0, PORTB
@@ -173,6 +169,8 @@ ANA_COMP:	; Analog Comparator Handler
 WATCHDOG:	; Watchdog Interrupt Handler
 	pushSreg [r16]
 	push r17
+	ldi r16,0b011111
+	out PORTB,r16
 		ldi r16, 'W' 
 		rcall typeCharDir
 		ldi r16, 'D'
@@ -185,7 +183,6 @@ WATCHDOG:	; Watchdog Interrupt Handler
 		rcall typeCharDir
 		ldi r16, 0x0D
 		rcall typeCharDir
-		sbi PORTB, 3
 	pop r17
 	popSreg [r16]
 	reti
