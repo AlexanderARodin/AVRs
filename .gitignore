@@ -3,5 +3,8 @@
 *.obj
 *.cof
 
+# LIST files
+*.lst
+
 # Firmware files
 #*.hex
