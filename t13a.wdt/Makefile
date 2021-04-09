@@ -20,7 +20,7 @@ burnflash: $(FLASHHEX) $(EEPHEX)
 	$(BURNER) -c $(PROG) -p $(CHIP) -U flash:w:$(FLASHHEX)
 
 compile: $(SRC)
-	$(CC) $(CFLAGS) $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -l $(SRC:.s=.lst)
 	rm -rfv *.obj *.cof
 
 edit:
