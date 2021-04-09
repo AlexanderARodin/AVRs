@@ -21,6 +21,7 @@ burnflash: $(FLASHHEX) $(EEPHEX)
 
 compile: $(SRC)
 	$(CC) $(CFLAGS) $(SRC)
+	rm -rfv *.obj *.cof
 
 edit:
 	vim $(SRC)
