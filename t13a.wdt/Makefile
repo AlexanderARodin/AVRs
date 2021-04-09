@@ -1,4 +1,4 @@
-SRC=wdt.t13.s
+SRC=main.s
 CHIP=t13
 FLASHHEX=flash.hex
 EEPHEX=eep.hex
