@@ -4,4 +4,4 @@
 *.cof
 
 # Firmware files
-*.hex
+#*.hex
