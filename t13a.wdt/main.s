@@ -19,17 +19,19 @@
 0x0009:	rjmp ADC_C			; ADC Conversion Handler
 
 RESET:
+	; RESET WDT
 	cli
-	outi	[SPL, r16, low(RAMEND)]		; Stack
-	in r18,MCUSR						; RES info
-	wdr
-	ldi r16, 0
-	out MCUSR, r16						; Crear WDT etc
+	in r18,MCUSR			; save RES info
+	ldi r16, 0				; and clear
+	out MCUSR, r16
 	;          76543210
-	ldi r16, 0b00010111
+	ldi r16, 0b00011000		; reset WDT
+	ldi r17, 0b01000111		; reset preScaler
 	out WDTCR, r16
+	out WDTCR, r17
 
 INIT:
+	outi	[SPL, r16, low(RAMEND)]		; Stack
 	outi	[DDRB, r16, 0b00011111]			; output
 	
 	setTxSilenceUsing [r17]
@@ -54,9 +56,9 @@ INIT:
 	rcall typeCharDir
 	
 	; setup timer0
-	outi	[TIMSK0, r16, 0b00001110]		; timer interrupts mask
-	outi	[TCCR0A, r16, 0];b01010010]		; settings for PWM
+	;outi	[TCCR0A, r16, 0];b01010010]		; settings for PWM
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
+	outi	[TIMSK0, r16, 0b00000010]		; timer interrupts mask
 	;outi	[OCR0A, r16, 200]
 	;outi	[OCR0B, r16, 44]
 	;outi	[GTCCR, r16, 1]
@@ -68,6 +70,8 @@ MAIN:
 	setTxSilenceUsing [r17]
 	ldi r16, '.' 
 	rcall typeChareSafe
+	;in r16,TCNT0
+	;rcall typeChareSafe
 
 	rcall waitLong
 	rcall waitLong
@@ -81,9 +85,9 @@ rjmp MAIN
 
 ; -- send char to Tx    --
 typeChareSafe:
-	cli
+	;cli
 	sendTxAChar [r16,r17]
-	sei
+	;sei
 	ret
 
 typeCharDir:
@@ -117,8 +121,7 @@ WLoop2:
 ; -- interrupts handlers --
 
 TIM0_OVF:	; Timer0 Overflow Handler
-	sbi PORTB,0
-	pushldi		[r16, 0b00000010]
+	pushldi		[r16, 0b00000001]
 	pushSreg	[r0]
 	in r0, PORTB
 	eor r0, r16
@@ -128,8 +131,7 @@ TIM0_OVF:	; Timer0 Overflow Handler
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
-	sbi PORTB, 1
-	pushldi		[r16, 0b00000100]
+	pushldi		[r16, 0b00000010]
 	pushSreg	[r0]
 	in r0, PORTB
 	eor r0, r16
@@ -139,8 +141,7 @@ TIM0_COMPA:	; Timer0 CompareA Handler
 	reti
 
 TIM0_COMPB:	; Timer0 CompareB Handler
-	sbi PORTB, 2
-	pushldi		[r16, 0b00001000]
+	pushldi		[r16, 0b00000100]
 	pushSreg	[r0]
 	in r0, PORTB
 	eor r0, r16
@@ -169,8 +170,6 @@ ANA_COMP:	; Analog Comparator Handler
 WATCHDOG:	; Watchdog Interrupt Handler
 	pushSreg [r16]
 	push r17
-	ldi r16,0b011111
-	out PORTB,r16
 		ldi r16, 'W' 
 		rcall typeCharDir
 		ldi r16, 'D'

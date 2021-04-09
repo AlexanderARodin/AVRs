@@ -27,8 +27,8 @@ INIT:
 
 	rcall processRestartConditions
 
-	outi	[TIMSK0, r16, 0b00001100]		; timer interrupts mask
-	outi	[TCCR0A, r16, 0b01010010]		; settings for PWM
+	outi	[TIMSK0, r16, 0b00000010]		; timer interrupts mask
+	outi	[TCCR0A, r16, 0];b01010010]		; settings for PWM
 	outi	[TCCR0B, r16, 0b00000101]		; pre-scaler 1024
 	outi	[OCR0A, r16, 200]
 	outi	[OCR0B, r16, 44]
