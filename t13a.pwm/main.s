@@ -53,12 +53,12 @@ INIT:
 	ldi argFunc, 0x0D
 	rcall typeChar
 	
-	; setup timer0
-	;outi	[TCCR0A, r16, 0];b01010010]		; settings for PWM
-	outiMain [TCCR0B, (1<<CS02)|(0<<CS01)|(1<<CS00)]		; pre-scaler 1024
-	outiMain [TIMSK0, (1<<TOIE0)]		; timer interrupts mask
-	;outi	[OCR0A, r16, 200]
-	;outi	[OCR0B, r16, 44]
+	; -- setup timer0
+	outiMain [TCCR0A, (0<<COM0A1)|(1<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(0<<WGM01)|(0<<WGM00)] ; settings for PWM
+	outiMain [TCCR0B, (1<<CS02)|(0<<CS01)|(1<<CS00)]	; pre-scaler 1024
+	outiMain [TIMSK0, (0<<OCIE0A)|(0<<OCIE0B)|(1<<TOIE0)]			; timer interrupts mask
+	outiMain [OCR0A, 200]
+	outiMain [OCR0B, 44]
 	;outi	[GTCCR, r16, 1]
 
 	sei						; Enable interrupts
@@ -119,7 +119,7 @@ TIM0_OVF:	; Timer0 Overflow Handler
 
 TIM0_COMPA:	; Timer0 CompareA Handler
 	pushSregIRQ
-	ldi altIRQ, (1<<PB1)
+	ldi altIRQ, (1<<PB0)
 	in  tmpIRQ, PORTB
 	eor tmpIRQ, altIRQ
 	out PORTB,  tmpIRQ
@@ -128,7 +128,7 @@ TIM0_COMPA:	; Timer0 CompareA Handler
 
 TIM0_COMPB:	; Timer0 CompareB Handler
 	pushSregIRQ
-	ldi altIRQ, (1<<PB2)
+	ldi altIRQ, (1<<PB1)
 	in  tmpIRQ, PORTB
 	eor tmpIRQ, altIRQ
 	out PORTB,  tmpIRQ
