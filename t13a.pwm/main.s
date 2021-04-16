@@ -20,11 +20,10 @@
 0x0009:	rjmp ADC_C			; ADC Conversion Handler
 
 RESET:
-	; RESET WDT
+	; -- RESET WDT
 	cli
 	in resetInfo, MCUSR			; save RES Info
 	outiMain [MCUSR,0]			; clean RES Info
-	;                  76543210
 	outiMain [WDTCR, (1<<WDCE)|(1<<WDE)]; reset WDT
 	outiMain [WDTCR,(1<<WDTIE)|(1<<WDP2)|(1<<WDP1)|(1<<WDP0)]; reset preScaler
 
@@ -32,6 +31,15 @@ INIT:
 	outiMain	[SPL, low(RAMEND)]		; Stack
 	outiMain	[DDRB, (1<<DDB4)|(1<<DDB3)|(1<<DDB2)|(1<<DDB1)|(1<<DDB0)]		; output
 	
+
+	; -- setup timer0
+	outiMain [TCCR0A, (1<<COM0A1)|(1<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(1<<WGM01)|(1<<WGM00)] ; settings for PWM
+	outiMain [TCCR0B, (0<<FOC0A)|(0<<FOC0B)|(0<<WGM02)|(1<<CS02)|(0<<CS01)|(1<<CS00)]	; pre-scaler 1024
+	outiMain [TIMSK0, (0<<OCIE0A)|(0<<OCIE0B)|(1<<TOIE0)]			; timer interrupts mask
+	outiMain [OCR0A, 2]
+	outiMain [OCR0B, 44]
+	;outi	[GTCCR, r16, 1]
+
 	setTxSilenceUsing
 	ldi argFunc, 0x0A
 	rcall typeChar
@@ -52,16 +60,8 @@ INIT:
 	rcall typeChar
 	ldi argFunc, 0x0D
 	rcall typeChar
-	
-	; -- setup timer0
-	outiMain [TCCR0A, (0<<COM0A1)|(1<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(0<<WGM01)|(0<<WGM00)] ; settings for PWM
-	outiMain [TCCR0B, (1<<CS02)|(0<<CS01)|(1<<CS00)]	; pre-scaler 1024
-	outiMain [TIMSK0, (0<<OCIE0A)|(0<<OCIE0B)|(1<<TOIE0)]			; timer interrupts mask
-	outiMain [OCR0A, 200]
-	outiMain [OCR0B, 44]
-	;outi	[GTCCR, r16, 1]
-
-	sei						; Enable interrupts
+	; -- enable interrupts
+	sei
 
 
 MAIN:
