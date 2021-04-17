@@ -25,7 +25,7 @@ RESET:
 	in resetInfo, MCUSR			; save RES Info
 	outiMain [MCUSR,0]			; clean RES Info
 	outiMain [WDTCR, (1<<WDCE)|(1<<WDE)]; reset WDT
-	outiMain [WDTCR,(1<<WDTIE)|(1<<WDP2)|(1<<WDP1)|(1<<WDP0)]; reset preScaler
+	outiMain [WDTCR,(1<<WDTIE)|(0<<WDP2)|(1<<WDP1)|(1<<WDP0)]; reset preScaler
 
 INIT:
 	outiMain	[SPL, low(RAMEND)]		; Stack
@@ -33,10 +33,10 @@ INIT:
 	
 
 	; -- setup timer0
-	outiMain [TCCR0A, (1<<COM0A1)|(1<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(1<<WGM01)|(1<<WGM00)] ; settings for PWM
+	outiMain [TCCR0A, (1<<COM0A1)|(0<<COM0A0)|(0<<COM0B1)|(0<<COM0B0)|(1<<WGM01)|(1<<WGM00)] ; settings for PWM
 	outiMain [TCCR0B, (0<<FOC0A)|(0<<FOC0B)|(0<<WGM02)|(1<<CS02)|(0<<CS01)|(1<<CS00)]	; pre-scaler 1024
 	outiMain [TIMSK0, (0<<OCIE0A)|(0<<OCIE0B)|(1<<TOIE0)]			; timer interrupts mask
-	outiMain [OCR0A, 2]
+	outiMain [OCR0A, 0]
 	outiMain [OCR0B, 44]
 	;outi	[GTCCR, r16, 1]
 
@@ -65,9 +65,11 @@ INIT:
 
 
 MAIN:
+	cli
 	setTxSilenceUsing
 	ldi argFunc, '.' 
 	rcall typeChar
+	sei
 	;in r16,TCNT0
 	;rcall typeChareSafe
 
@@ -137,6 +139,12 @@ TIM0_COMPB:	; Timer0 CompareB Handler
 
 WATCHDOG:	; Watchdog Interrupt Handler
 	pushSregIRQ
+	in tmpIRQ, OCR0A
+	ldi altIRQ, 0x02
+	add tmpIRQ, altIRQ
+	out OCR0A, tmpIRQ
+	;rjmp WDTOUT
+
 	push argFunc
 	push tmpFunc
 		ldi argFunc, 'W' 
@@ -153,6 +161,8 @@ WATCHDOG:	; Watchdog Interrupt Handler
 		rcall typeChar
 	pop tmpFunc
 	pop argFunc
+
+	WDTOUT:
 	popSregIRQ
 	reti
 
