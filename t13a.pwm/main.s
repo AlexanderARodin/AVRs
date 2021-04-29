@@ -25,7 +25,7 @@ RESET:
 	in resetInfo, MCUSR			; save RES Info
 	outiMain [MCUSR,0]			; clean RES Info
 	outiMain [WDTCR, (1<<WDCE)|(1<<WDE)]; reset WDT
-	outiMain [WDTCR,(1<<WDTIE)|(0<<WDP2)|(1<<WDP1)|(1<<WDP0)]; reset preScaler
+	outiMain [WDTCR,(1<<WDTIE)|(0<<WDP3)|(0<<WDP2)|(0<<WDP1)|(0<<WDP0)]; reset preScaler
 
 INIT:
 	outiMain	[SPL, low(RAMEND)]		; Stack
