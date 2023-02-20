@@ -1,4 +1,4 @@
-SRC=interruptTable.t13.s
+SRC=qemu-start.s
 CHIP=t13
 FLASHHEX=flash.hex
 EEPHEX=eep.hex
