@@ -21,9 +21,9 @@ burnflash: $(FLASHHEX) $(EEPHEX)
 	@echo '[burning flash & eeprom]'
 	$(BURNER) -c $(PROG) -p $(CHIP) -U flash:w:$(FLASHHEX)
 
-qemubin: compile
+qemubin: $(FLASHHEX)
 	@echo '[generate bin for QEMU]'
-	$objcopy --input-target=ihex --output-target=binary $(FLASHHEX) $(FLASHBIN)
+	@objcopy --input-target=ihex --output-target=binary $(FLASHHEX) $(FLASHBIN)
 
 compile: $(SRC)
 	@echo '[compile]'
