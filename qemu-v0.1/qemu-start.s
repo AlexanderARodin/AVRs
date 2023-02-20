@@ -18,6 +18,9 @@
 RESET:
 	ldi r16, low(RAMEND)		; Load top of RAM
 	out SPL,r16					; Set Stack Pointer to top of RAM
+	
+	out DDRB, 0
+	
 	sei
 
 INIT:
