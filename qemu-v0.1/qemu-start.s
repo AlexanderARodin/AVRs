@@ -26,10 +26,20 @@ RESET:
 
 INIT:
 	ldi R16, 0
+	ldi r18, 0x00
+	ldi r19, 0xFF
 MAIN:
 
 LOOP:
+	out PORTB, r18
+	nop
+	in r30, PINB
+	nop
 	inc r16
+	not
+	out PORTB, r19
+	nop
+	in r30, PINB
 	RJMP LOOP					; loop to LOOP
 
 
