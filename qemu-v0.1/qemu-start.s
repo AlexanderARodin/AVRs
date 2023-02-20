@@ -18,113 +18,56 @@
 RESET:
 	ldi r16, low(RAMEND)		; Load top of RAM
 	out SPL,r16					; Set Stack Pointer to top of RAM
+	sei
 
 INIT:
-	ldi R16, 0b00011111		; mask for output Ports 
-	out DDRB, R16				; load the mask from  R16 to  DDRB
-	;sei							; Enable interrupts
-
-
-.equ Delay = 1;				; установка константы времени задержки
+	ldi R16, 0
 MAIN:
-	in r2,MCUSR
-	ldi r16, 0
-	out MCUSR, r16
-tsttt:
-	out PORTB, r2
-	;rcall setAllPorts
-	rcall waitLong
-	rcall clearAllPorts
-	rcall waitLong
-	rjmp tsttt
-	rcall setAllPorts
-	rcall waitLong
-	rcall clearAllPorts
-	rcall waitLong
-	rcall setAllPorts
 
 LOOP:
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB0
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB1
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB2
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB3
-	RCALL Wait
-	RCAll clearAllPorts
-	RCALL Wait
-	SBI PORTB, PORTB4
-	RCALL Wait
+	inc r16
 	RJMP LOOP					; loop to LOOP
 
-; -- waiting subroutine --
-waitLong:
-	ldi R17, Delay * 10
-	rjmp WLoop0
-Wait:
-	LDI  R17, Delay			; загрузка константы для задержки в регистр R17
-WLoop0:
-	LDI  R18, 50				; загружаем число 50 (0x32) в регистр R18
-WLoop1:
-	LDI  R19, 0xC8				; загружаем число 200 (0xC8, $C8) в регистр R19
-WLoop2:
-	DEC  R19						; уменьшаем значение в регистре R19 на 1
-	BRNE WLoop2					; возврат к WLoop2 если значение в R19 не равно 0
-	DEC  R18						; уменьшаем значение в регистре R18 на 1
-	BRNE WLoop1					; возврат к WLoop1 если значение в R18 не равно 0
-	DEC  R17						; уменьшаем значение в регистре R17 на 1
-	BRNE WLoop0					; возврат к WLoop0 если значение в R17 не равно 0
-	RET							; возврат из подпрограммы Wait
-
-clearAllPorts:
-	ldi r16, 0
-	out PORTB, r16
-	ret
-
-setAllPorts:
-	ldi r16, 0b00011111
-	out PORTB, r16
-	ret
 
 ; -- ################### --
 ; -- interrupts handlers --
 
 EXT_INT0:	; IRQ0 Handler
+	ldi r1, 123
 	reti
 
 PC_INT0:	; PCINT0 Handler
+	ldi r2, 123
 	reti
 
 TIM0_OVF:	; Timer0 Overflow Handler
+	ldi r3, 123
 	reti
 
 EE_RDY:		; EEPROM Ready Handler
+	ldi r4, 123
 	reti
 
 ANA_COMP:	; Analog Comparator Handler
+	ldi r5, 123
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
+	ldi r6, 123
 	reti
 
 TIM0_COMPB:	; Timer0 CompareB Handler
+	ldi r7, 123
 	reti
 
 WATCHDOG:	; Watchdog Interrupt Handler
+	ldi r8, 123
 	reti
 
 ADC_C:		; ADC Conversion Handler
+	ldi r9, 123
 	reti	; handler exit
 
 ; -- ################### --
 ; -- const data in FLASH --
-Program_name: .DB "basic template"
+Program_name: .DB "basic qemu template"
