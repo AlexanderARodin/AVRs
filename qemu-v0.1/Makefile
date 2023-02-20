@@ -1,7 +1,7 @@
 SRC=qemu-start.s
 CHIP=t13
-FLASHHEX=flash.hex
-EEPHEX=eep.hex
+FLASHHEX=$(SRC).hex
+EEPHEX=$(SRC).eep.hex
 FLASHBIN=flash.bin
 PROG=usbasp
 
