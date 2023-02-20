@@ -6,7 +6,6 @@ FLASHBIN=flash.bin
 PROG=usbasp
 
 CFLAGS=-o $(FLASHHEX) -e $(EEPHEX)
-#CHIP=$(suffix $(SRC:.s=))
 
 CC=avra
 BURNER=avrdude
@@ -29,6 +28,8 @@ compile: $(SRC)
 	@echo '[compile]'
 	$(CC) $(CFLAGS) $(SRC)
 
+edit:
+	vim $(SRC)
 
 clean:
 	rm -rfv *.obj *.cof *.hex *.bin
