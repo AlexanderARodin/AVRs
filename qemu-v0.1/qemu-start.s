@@ -33,39 +33,39 @@ LOOP:
 ; -- interrupts handlers --
 
 EXT_INT0:	; IRQ0 Handler
-	ldi r1, 123
+	ldi r21, 123
 	reti
 
 PC_INT0:	; PCINT0 Handler
-	ldi r2, 123
+	ldi r22, 123
 	reti
 
 TIM0_OVF:	; Timer0 Overflow Handler
-	ldi r3, 123
+	ldi r23, 123
 	reti
 
 EE_RDY:		; EEPROM Ready Handler
-	ldi r4, 123
+	ldi r24, 123
 	reti
 
 ANA_COMP:	; Analog Comparator Handler
-	ldi r5, 123
+	ldi r25, 123
 	reti
 
 TIM0_COMPA:	; Timer0 CompareA Handler
-	ldi r6, 123
+	ldi r26, 123
 	reti
 
 TIM0_COMPB:	; Timer0 CompareB Handler
-	ldi r7, 123
+	ldi r27, 123
 	reti
 
 WATCHDOG:	; Watchdog Interrupt Handler
-	ldi r8, 123
+	ldi r28, 123
 	reti
 
 ADC_C:		; ADC Conversion Handler
-	ldi r9, 123
+	ldi r29, 123
 	reti	; handler exit
 
 ; -- ################### --
