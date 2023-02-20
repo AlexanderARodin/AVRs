@@ -1,30 +1,53 @@
 .INCLUDEPATH "/usr/share/avra/"	; path to INC-files
 .INCLUDE "m8def.inc"			; macrodefinitions for AT***
-.LIST							; generate listing
+.LIST								; generate listing
 
 .CSEG								; code segment
 .ORG 0x0000						; start address
-0x0000:	rjmp RESET			; Reset Handler
-0x0001:	rjmp EXT_INT0		; IRQ0 Handler
-0x0002:	rjmp PC_INT0		; PCINT0 Handler
-0x0003:	rjmp TIM0_OVF		; Timer0 Overflow Handler
-0x0004:	rjmp EE_RDY			; EEPROM Ready Handler
-0x0005:	rjmp ANA_COMP		; Analog Comparator Handler
-0x0006:	rjmp TIM0_COMPA	; Timer0 CompareA Handler
-0x0007:	rjmp TIM0_COMPB	; Timer0 CompareB Handler
-0x0008:	rjmp WATCHDOG		; Watchdog Interrupt Handler
-0x0009:	rjmp ADC_C			; ADC Conversion Handler
+0x0000	rjmp RESET			;External Pin, Power-on Reset, Brown-out Reset, and Watchdog Reset
+0x0001	rjmp OTHER_IRQ		;test closure
+0x0002	rjmp OTHER_IRQ		;test closure
+0x0003	rjmp OTHER_IRQ		;test closure
+0x0004	rjmp OTHER_IRQ		;test closure
+0x0005	rjmp OTHER_IRQ		;test closure
+0x0006	rjmp OTHER_IRQ		;test closure
+0x0007	rjmp OTHER_IRQ		;test closure
+0x0008	rjmp OTHER_IRQ		;test closure
+0x0009	rjmp OTHER_IRQ		;test closure
+0x000A	rjmp OTHER_IRQ		;test closure
+0x000B	rjmp OTHER_IRQ		;test closure
+0x000C	rjmp OTHER_IRQ		;test closure
+0x000D	rjmp OTHER_IRQ		;test closure
+0x000E	rjmp OTHER_IRQ		;test closure
+0x000F	rjmp OTHER_IRQ		;test closure
+0x0010	rjmp OTHER_IRQ		;test closure
+0x0011	rjmp OTHER_IRQ		;test closure
+0x0013	rjmp OTHER_IRQ		;test closure
+0x0014	rjmp OTHER_IRQ		;test closure
+0x0015	rjmp OTHER_IRQ		;test closure
+0x0016	rjmp OTHER_IRQ		;test closure
+0x0017	rjmp OTHER_IRQ		;test closure
+0x0018	rjmp OTHER_IRQ		;test closure
+0x0019	rjmp OTHER_IRQ		;test closure
+0x001A	rjmp OTHER_IRQ		;test closure
+0x001B	rjmp OTHER_IRQ		;test closure
+0x001C	rjmp OTHER_IRQ		;test closure
+0x001D	rjmp OTHER_IRQ		;test closure
+0x001E	rjmp OTHER_IRQ		;test closure
+0x001F	rjmp OTHER_IRQ		;test closure
+
 
 RESET:
+	ldi r16, high(RAMEND)	;
+	out SPH,r16					;
 	ldi r16, low(RAMEND)		; Load top of RAM
 	out SPL,r16					; Set Stack Pointer to top of RAM
-	
-	ldi r16, 0
-	out DDRB, r16
-	
 	sei
 
 INIT:
+	ldi r16, 0
+	out DDRB, r16
+	
 	ldi R16, 0
 	ldi r18, 0x00
 	ldi r19, 0xFF
@@ -46,41 +69,12 @@ LOOP:
 ; -- ################### --
 ; -- interrupts handlers --
 
-EXT_INT0:	; IRQ0 Handler
-	ldi r21, 123
+OTHER_IRQ:		;test closure
+	ldi r31, 0xFF
+deadLoop:
+	rjmp deadLoop
 	reti
 
-PC_INT0:	; PCINT0 Handler
-	ldi r22, 123
-	reti
-
-TIM0_OVF:	; Timer0 Overflow Handler
-	ldi r23, 123
-	reti
-
-EE_RDY:		; EEPROM Ready Handler
-	ldi r24, 123
-	reti
-
-ANA_COMP:	; Analog Comparator Handler
-	ldi r25, 123
-	reti
-
-TIM0_COMPA:	; Timer0 CompareA Handler
-	ldi r26, 123
-	reti
-
-TIM0_COMPB:	; Timer0 CompareB Handler
-	ldi r27, 123
-	reti
-
-WATCHDOG:	; Watchdog Interrupt Handler
-	ldi r28, 123
-	reti
-
-ADC_C:		; ADC Conversion Handler
-	ldi r29, 123
-	reti	; handler exit
 
 ; -- ################### --
 ; -- const data in FLASH --
