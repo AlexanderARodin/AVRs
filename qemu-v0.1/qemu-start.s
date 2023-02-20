@@ -1,5 +1,5 @@
 .INCLUDEPATH "/usr/share/avra/"	; path to INC-files
-.INCLUDE "tn13def.inc"			; macrodefinitions for AT***
+.INCLUDE "m8def.inc"			; macrodefinitions for AT***
 .LIST							; generate listing
 
 .CSEG								; code segment
