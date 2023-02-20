@@ -36,7 +36,7 @@ LOOP:
 	in r30, PINB
 	nop
 	inc r16
-	not
+	nop
 	out PORTB, r19
 	nop
 	in r30, PINB
