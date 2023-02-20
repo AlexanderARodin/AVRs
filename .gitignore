@@ -7,4 +7,5 @@
 *.lst
 
 # Firmware files
-#*.hex
+*.hex
+*.bin
