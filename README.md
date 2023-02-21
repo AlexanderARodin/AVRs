@@ -4,4 +4,5 @@ root folder for learning AVR assembler etc
 2) shared libs are collected in sub-folder ./libinc/
 
 
-test SSH-synchro
+# test SSH-synchro..
+# ..complited!
